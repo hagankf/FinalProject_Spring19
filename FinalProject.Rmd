@@ -32,11 +32,17 @@ lower48 <- data.frame(lapply(lower48, function(lower48) {
 }))
 
 # We looked at inverse of filter to see which cases were in USA == country but were also labeled as county != Non-USA. Those cases were those that were not part of the continental US. We are only looking at Kickstarter campaigns on 2013.
+
+#KH: The piping that you do above is very clear. The use of sub() in conjunction with levels() to essentially rename one of the factor levels in the categories column was helpful to see and is a strategy that I think will definitely be useful to me in the future. 
 ```
 
 ```{r split}
 lower48_split <- lower48 %>% 
   split(paste(lower48$state))
+
+#KH: This is a question, really, rather than feedback: I am curious about the possible advantages to using paste() here rather than 
+#lower48_split <- split(lower48, lower48$state)
+#I imagine there might be advantages, and your line of code is elegant and definitely doing what you want it to do. I just haven't figured out yet what role paste() is playing.
 
 lower48_nest <- lower48 %>%
   group_by(state) %>%
@@ -56,7 +62,8 @@ lower48_nest <- lower48 %>%
                       legend.position = "bottom",
                       legend.title = element_text(face = "bold"),
                       axis.title = element_text(face = "bold"))))
-          
+
+#KH: Your nesting by state and your use of map2 to generate a plot for each state exemplify the application of these functions. I see that the y-coordinates represent the logged value of the amount pledged. How might you convey that in the y-axis label?
           
 lower48_nest[[3]][4]
 ```
@@ -76,7 +83,12 @@ check_args <- function(data,
 	if(is.numeric(pull(data, !!enquo(group_var)))) {
 		warning("Warning: the grouping variable supplied is numeric, not categorical.")
 	}
-}
+} 
+
+#KH: I think this function's error messages and warning are nice and clear. I tried the function on a couple of examples below (one that I expected to throw a message, and one for which I didn't expect a message). It worked! It might be helfpul if the function returns something if everything checks out (if arguments are of the expected type). This way the user would get confirmation that the function did something, if that makes sense?
+
+#check_args(lower48, status, goal)
+#check_args(lower48, backers_count, goal)
 
 stat_calc <- function(data, 
                       group_var, 
@@ -96,5 +108,7 @@ stat_calc <- function(data,
 		summarize_at(vars(!!enquo(outcome_var)),
 		             .funs)
 }
+
+#stat_calc(lower48, status, goal) #KH: Here I was trying out the second function, which worked seamlessly. The use of check_args within stat_calc is effective, and now that I see the way that check_args is deployed within stat_calc, I would take back what I said above about returning something if the arguments check out. In the context of the stat_calc function, of course, the grouped summaries are returned.  
 ```
 
